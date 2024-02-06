@@ -8,19 +8,20 @@ on:
 
 jobs:
   build_and_release:
-    if: "startsWith(github.event.head_commit.message, 'Release') || startsWith(github.event.head_commit.message, 'release')"
     runs-on: windows-latest
 
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
-
-    - name: Extract version from PalEdit.py
+      
+    - name: Extract beta version from PalEdit.py
       id: extract_version
       run: |
         $version = Select-String -Path PalEdit.py -Pattern 'version\s*=\s*"([^"]+)"' | ForEach-Object { $_.Matches.Groups[1].Value }
-        Write-Host "Version found: $version"
-        echo "VERSION=$version" | Out-File -FilePath $env:GITHUB_ENV -Append
+        $commitHash = git rev-parse --short HEAD
+        $betaVersion = "${version}-beta.${commitHash}"
+        Write-Host "Beta Version found: $betaVersion"
+        echo "VERSION=$betaVersion"  | Out-File -FilePath $env:GITHUB_ENV -Append
 
     - name: Set up Python
       uses: actions/setup-python@v5
